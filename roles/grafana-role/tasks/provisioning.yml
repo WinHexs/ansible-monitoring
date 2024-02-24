@@ -1,0 +1,40 @@
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: grafana
+    state: directory
+  loop:
+    - '/etc/grafana/provisioning/dashboards'
+    - '/etc/grafana/provisioning/datasources'
+    - '/var/lib/grafana/dashboards'
+
+- name: Copy prometheus datasources
+  ansible.builtin.copy:
+    src: datasources/prometheus.yaml
+    dest: /etc/grafana/provisioning/datasources/prometheus.yaml
+    owner: root
+    group: grafana
+    mode: 0644
+  notify:
+    - Restart Grafana
+
+- name: Copy dashboard 1860 yaml
+  ansible.builtin.copy:
+    src: dashboards/1860.yaml
+    dest: /etc/grafana/provisioning/dashboards/1860.yaml
+    owner: root
+    group: grafana
+    mode: 0644
+  notify:
+    - Restart Grafana
+
+- name: Copy dashboard 1860 json
+  ansible.builtin.copy:
+    src: dashboards/1860_rev33.json
+    dest: /var/lib/grafana/dashboards/1860_rev33.json
+    owner: root
+    group: grafana
+    mode: 0644
+  notify:
+    - Restart Grafana

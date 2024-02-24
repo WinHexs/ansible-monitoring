@@ -1,0 +1,8 @@
+---
+# tasks file for node-exporter-role
+- name: Prepare for install
+  include_tasks: "prepare.yml"
+  
+- name: Install Node Exporter
+  include_tasks: "node-exporter.yml"
+  

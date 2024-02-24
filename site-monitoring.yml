@@ -1,0 +1,14 @@
+---
+#- name: Playbook for install system monitoring
+- hosts: monitoring
+  gather_facts: true
+  serial: 5
+  remote_user: root
+  
+  roles:
+    - role: common-role
+      when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "8") 
+    - role: prometheus-role
+      when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "8") 
+    - role: grafana-role
+      when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "8") 

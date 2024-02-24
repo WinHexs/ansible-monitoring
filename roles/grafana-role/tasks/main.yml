@@ -1,0 +1,7 @@
+---
+# tasks file for grafana-role    
+- name: Install Grafana
+  include_tasks: "grafana.yml"
+  
+- name: Provision
+  include_tasks: "provisioning.yml"

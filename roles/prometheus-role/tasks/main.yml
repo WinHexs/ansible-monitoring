@@ -1,0 +1,76 @@
+---
+# tasks file for prometheus-role
+- name: Create user
+  ansible.builtin.user:
+    name: prometheus
+    shell: /bin/false
+    create_home: false
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: prometheus
+    group: prometheus
+    state: directory
+  loop:
+    - '/tmp/prometheus'
+    - '/etc/prometheus'
+    - '/var/lib/prometheus'
+    
+- name: Download and unarchive
+  ansible.builtin.unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+    dest: /tmp/prometheus
+    creates: prometheus-{{ prometheus_version }}.linux-amd64
+    remote_src: yes
+
+- name: Copy files to bin
+  ansible.builtin.copy:
+    src: /tmp/prometheus/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}
+    dest: /usr/local/bin/
+    owner: prometheus
+    group: prometheus
+    mode: preserve
+    remote_src: true
+  loop:
+    - 'prometheus'
+    - 'promtool'
+    
+- name: Copy directories to etc
+  ansible.builtin.copy:
+    src: /tmp/prometheus/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}
+    dest: /etc/prometheus/
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+    remote_src: true
+  loop:
+    - 'console_libraries'
+    - 'consoles'
+     
+- name: Copy configuration 
+  ansible.builtin.template:
+    src: prometheus.yml
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+  notify:
+   - Restart Prometheus
+     
+- name: Copy systemd service
+  ansible.builtin.copy:
+    src: prometheus.service
+    dest: /etc/systemd/system
+    owner: root
+    group: root
+    mode: 0755
+  notify:
+   - Restart Prometheus
+   
+- name: Start
+  ansible.builtin.systemd_service:
+    name: prometheus
+    enabled: true
+    daemon_reload: true
+    state: started

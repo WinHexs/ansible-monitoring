@@ -1,0 +1,6 @@
+---
+# handlers file for common-role
+- name: Restart Firewalld
+  ansible.builtin.systemd_service:
+    name: firewalld
+    state: restarted
